@@ -102,54 +102,88 @@ def undo():
 
 
 def create_expense(apartment, amount, type):
+    """
+    Creates the list with ap. on pos 0, amount on 1, and type on 2
+    :param apartment:
+    :param amount:
+    :param type:
+    :return: expense as a list
+    """
     return [apartment, amount, type]
+
 
 '''
 cmd int tip int
-add <apartment> <type> <amount>
-remove <apartment>
-remove <start apartment> to <end apartment>
-remove <type>
-replace <apartment> <type> with <amount>
+add int <apartment> str<type> int<amount>
+remove int<apartment>
+remove int<start apartment> to int<end apartment>
+remove str<type>
+replace int<apartment> str<type> with int<amount>
 list
-list <apartment>
-list [ < | = | > ] <amount>
-sum <type>
-max <apartment>
-sort apartment
-sort type
-filter <type>
-filter <value>
-undo <steps>
+list int<apartment>
+list str[ < | = | > ] int<amount>
+sum str<type>
+max int<apartment>
+sort int<apartment
+sort str<type
+filter str<type>
+filter int<value>
+undo int<steps>
+
+param 1  could be  
+    -int (apartment)
+    -string(type)
+    -string (< > =)
+    -int ( value) - filter
+    -int (steps) - undo
+    
 
 '''
 
-def read_command():
+
+def read_command(usr_input):
     """
-    Reads a command from the console and parses it
-    :return:
+    Reads a command from the console and parses it returning a tuple
+
+    :return:    cmd         :(str)   the function to call
+                param1,     :(int)
+                param2,     :(str)
+                param3,     :(int)
+                with_word   :(str)   'with'     if the command contains the word
+                to_word     :(str)   'to'       if the command contains the word
     """
-    raw_input = input(">")
+    # raw_input = input(">")
+    raw_input = usr_input
     pattern = re.compile(r"""   \s*                                 
                                 (?P<command>\b[a-zA-Z]*\b)\s* 
                                 (?P<param1>\b\d*\b)\s*
+                                (?P<with>\bwith\b)?\s*
+                                (?P<to>\bto\b)?\s*
                                 (?P<param2>\b[a-zA-Z]*\b)\s*
                                 (?P<param3>\b\d*\b)\s*
+                                
                                 """, re.VERBOSE)
     match = pattern.match(raw_input)
     cmd = None
     param1 = None
     param2 = None
     param3 = None
+    with_word = None
+    to_word = None
     if match is not None:
         cmd = match.group("command")
         param1 = match.group("param1")
         param2 = match.group("param2")
         param3 = match.group("param3")
-    return cmd, param1, param2, param3
+        with_word = match.group("with")
+        to_word = match.group("to")
 
+    return cmd, param1, param2, param3, with_word, to_word
 
-def validate_command(cmd, param1, param2, param3):
+def validate_params():
+    pass
+
+def validate_command(cmd):
     pass
 
 
@@ -157,8 +191,36 @@ def main():
     pass
 
 
-read_command()
+def test_read_command():
+    user_inputs = ['add 25 gas 100',
+                   'remove 15',
+                   'remove 5 to 10',
+                   'remove gas',
+                   'replace 12 gas with 200',
+                   'list',
+                   'list 15',
+                   'list > 100',
+                   'list = 17',
+                   'sum gas',
+                   'max 25',
+                   'sort apartment',
+                   'sort type',
+                   'filter gas',
+                   'filter 300',
+                   'undo']
 
+    for user_input in user_inputs:
+        cmd, param1, param2, param3, with_word, to_word = read_command(user_input)
+        print(cmd)
+        print(param1)
+        print(param2)
+        print(param3)
+        print(with_word)
+        print(to_word)
+        print('')
+
+
+test_read_command()
 '''
 add 12 food 
 '''
