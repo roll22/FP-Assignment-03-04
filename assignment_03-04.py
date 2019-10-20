@@ -77,39 +77,54 @@ REGEX
 import re
 
 
-def add_transaction():
+def add_expense(expenses, params):
+    expense = create_expense(apartment=params[0],
+                             type=params[1],
+                             amount=params[2])
+    expenses.append(expense)
+
+
+def remove(expenses, params):
     pass
 
 
-def remove():
+def replace(expenses, params):
     pass
 
 
-def replace():
+def display(expenses, params):
     pass
 
 
-def display_w_properties():
+def sum_of_expenses(expenses, params):
     pass
 
 
-def filter():
+def max_of_expenses(expenses, params):
     pass
 
 
-def undo():
+def sort_expenses(expenses, params):
     pass
 
 
-def create_expense(apartment, amount, type):
+def filter(expenses, params):
+    pass
+
+
+def undo(expenses, params):
+    pass
+
+
+def create_expense(apartment, type, amount):
     """
     Creates the list with ap. on pos 0, amount on 1, and type on 2
     :param apartment:
-    :param amount:
     :param type:
+    :param amount:
     :return: expense as a list
     """
-    return [apartment, amount, type]
+    return [apartment, type, amount]
 
 
 '''
@@ -178,13 +193,80 @@ def read_command(usr_input):
         with_word = match.group("with")
         to_word = match.group("to")
 
-    return cmd, param1, param2, param3, with_word, to_word
+    return cmd, [param1, param2, param3, with_word, to_word]
 
-def validate_params():
+
+def validate_add_params(params):
+    """
+    Validates the needed params
+    Raises ValueError for invalid parameters
+    :param params: list of params
+    :return:list of useful params
+    """
+    # no need to try/except int() because of regex parsing
+    apartment = params[0]
+    if apartment == '':
+        raise ValueError('apartment')
+    else:
+        apartment = int(apartment)
+        if apartment <= 0:
+            raise ValueError('apartment')
+
+    types = ('water',
+             'heating',
+             'electricity',
+             'gas',
+             'other')
+    type = params[1]
+    if type not in types:
+        raise ValueError('type')
+
+    amount = params[2]
+    if amount == '':
+        raise ValueError('amount')
+    else:
+        amount = int(amount)
+
+    return apartment, type, amount
+
+
+def validate_remove_params(params):
     pass
 
-def validate_command(cmd):
+
+def validate_replace_params(params):
     pass
+
+
+def validate_display_params(params):
+    pass
+
+
+def validate_sum_of_expenses_params(params):
+    pass
+
+
+def validate_max_of_expenses_params(params):
+    pass
+
+
+def validate_sort_expenses_params(params):
+    pass
+
+
+def validate_filter_params(params):
+    pass
+
+
+def validate_undo_params(params):
+    pass
+
+
+def validate_command(commands, cmd):
+    try:
+        return commands[cmd][0]
+    except KeyError:
+        return None
 
 
 def main():
@@ -192,32 +274,53 @@ def main():
 
 
 def test_read_command():
-    user_inputs = ['add 25 gas 100',
-                   'remove 15',
-                   'remove 5 to 10',
-                   'remove gas',
-                   'replace 12 gas with 200',
-                   'list',
-                   'list 15',
-                   'list > 100',
-                   'list = 17',
-                   'sum gas',
-                   'max 25',
-                   'sort apartment',
-                   'sort type',
-                   'filter gas',
-                   'filter 300',
-                   'undo']
-
+    user_inputs = ['     add 2 gas 200',
+                   'add 01 electricity 200']
+                    # 'remove 15',
+    # 'remove 5 to 10',
+    # 'remove gas',
+    # 'replace 12 gas with 200',
+    # 'list',
+    # 'list 15',
+    # 'list > 100',
+    # 'list = 17',
+    # 'sum gas',
+    # 'max 25',
+    # 'sort apartment',
+    # 'sort type',
+    # 'filter gas',
+    # 'filter 300',
+    # 'undo 12']
+    expenses = []
     for user_input in user_inputs:
-        cmd, param1, param2, param3, with_word, to_word = read_command(user_input)
-        print(cmd)
-        print(param1)
-        print(param2)
-        print(param3)
-        print(with_word)
-        print(to_word)
-        print('')
+
+        cmd, params = read_command(user_input)
+        cmds = {'add': [add_expense, validate_add_params],
+                'remove': [remove, validate_remove_params],
+                'replace': replace,
+                'list': display,
+                'sum': sum_of_expenses,
+                'max': max_of_expenses,
+                'sort': sort_expenses,
+                'filter': filter,
+                'undo': undo}
+
+        function_to_call = validate_command(commands=cmds, cmd=cmd)
+        if function_to_call is not None:
+            validation_function_to_run = cmds[cmd][1]
+            try:
+                params = validation_function_to_run(params)
+            except ValueError as exception:
+                print('Failed: Bad ' + str(exception.args[0]))
+                params = None
+
+            if params is not None:
+                function_to_call(expenses, validation_function_to_run(params))
+            print(expenses)
+        elif cmd == 'exit':
+            return
+        else:
+            print("bad command")
 
 
 test_read_command()
