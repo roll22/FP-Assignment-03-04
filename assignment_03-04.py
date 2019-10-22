@@ -74,7 +74,24 @@ MENU
 REGEX
 
 '''
+import operator
 import re
+
+
+def get_apartment(expense):
+    return expense[0]
+
+
+def get_type(expense):
+    return expense[1]
+
+
+def get_amount(expense):
+    return expense[2]
+
+
+def set_amount(expense, amount):
+    expense[2] = amount
 
 
 def add_expense(expenses, params):
@@ -85,15 +102,83 @@ def add_expense(expenses, params):
 
 
 def remove(expenses, params):
-    pass
+    if len(params) == 2:
+        to_delete = []
+        for idx, expense in enumerate(expenses):
+            if params[0] <= get_apartment(expense) <= params[1]:
+                to_delete.append(idx)
+        for offset, index in enumerate(to_delete):
+            index -= offset
+            del expenses[index]
+    if len(params) == 1:
+        if type(params[0]) == int:
+            to_delete = []
+            for idx, expense in enumerate(expenses):
+                if params[0] == get_apartment(expense):
+                    to_delete.append(idx)
+            for offset, index in enumerate(to_delete):
+                index -= offset
+                del expenses[index]
+        else:
+            to_delete = []
+            for idx, expense in enumerate(expenses):
+                if params[0] == get_type(expense):
+                    to_delete.append(idx)
+            for offset, index in enumerate(to_delete):
+                index -= offset
+                del expenses[index]
 
 
 def replace(expenses, params):
-    pass
+    """
+
+    :param expenses:
+    :param params:
+    :return:
+    """
+    apartment = params[0]
+    type = params[1]
+    amount = params[2]
+    for expense in expenses:
+        if apartment == get_apartment(expense) and type == get_type(expense):
+            set_amount(expense, amount)
+
+
+def print_expense(expense):
+    print('apartment: ' + str(get_apartment(expense)) +
+          '  type: ' + get_type(expense) +
+          '  amount: ' + str(get_amount(expense)))
 
 
 def display(expenses, params):
-    pass
+    if len(params) == 0:
+        # 9 first 4 space 4 second 10 space 6 last
+
+        for expense in expenses:
+            print_expense(expense)
+
+    elif len(params) == 1:
+        for expense in expenses:
+            if get_apartment(expense) == params[0]:
+                print_expense(expense)
+
+    elif len(params) == 2:
+        sign = params[1]
+        amount = params[0]
+
+        def get_operator_fn(op):
+            return {
+                '<': operator.lt,
+                '<=': operator.le,
+                '=': operator.eq,
+                '>=': operator.ge,
+                '>': operator.gt,
+            }[op]
+
+        sign = get_operator_fn(sign)
+        for expense in expenses:
+            if sign(get_amount(expense), amount):
+                print_expense(expense)
 
 
 def sum_of_expenses(expenses, params):
@@ -144,19 +229,10 @@ sort str<type
 filter str<type>
 filter int<value>
 undo int<steps>
-
-param 1  could be  
-    -int (apartment)
-    -string(type)
-    -string (< > =)
-    -int ( value) - filter
-    -int (steps) - undo
-    
-
 '''
 
 
-def read_command(usr_input):
+def read_command(usr_input=None):
     """
     Reads a command from the console and parses it returning a tuple
 
@@ -167,14 +243,16 @@ def read_command(usr_input):
                 with_word   :(str)   'with'     if the command contains the word
                 to_word     :(str)   'to'       if the command contains the word
     """
-    # raw_input = input(">")
-    raw_input = usr_input
+    raw_input = input(">")
+    #raw_input = usr_input
     pattern = re.compile(r"""   \s*                                 
                                 (?P<command>\b[a-zA-Z]*\b)\s* 
+                                (?P<sign>[<>=]{1,2})?\s*
                                 (?P<param1>\b\d*\b)\s*
                                 (?P<with>\bwith\b)?\s*
                                 (?P<to>\bto\b)?\s*
                                 (?P<param2>\b[a-zA-Z]*\b)\s*
+                                (?P<with_optional>\bwith\b)?\s*
                                 (?P<param3>\b\d*\b)\s*
                                 
                                 """, re.VERBOSE)
@@ -185,12 +263,18 @@ def read_command(usr_input):
     param3 = None
     with_word = None
     to_word = None
+    sign = None
     if match is not None:
         cmd = match.group("command")
         param1 = match.group("param1")
         param2 = match.group("param2")
         param3 = match.group("param3")
         with_word = match.group("with")
+        sign = match.group("sign")
+        if match.group("with_optional") is not None:
+            with_word = match.group("with_optional")
+        if sign is not None and param2 is '':
+            param2 = sign
         to_word = match.group("to")
 
     return cmd, [param1, param2, param3, with_word, to_word]
@@ -198,7 +282,7 @@ def read_command(usr_input):
 
 def validate_add_params(params):
     """
-    Validates the needed params
+    Validates the needed params for add function
     Raises ValueError for invalid parameters
     :param params: list of params
     :return:list of useful params
@@ -209,9 +293,6 @@ def validate_add_params(params):
         raise ValueError('apartment')
     else:
         apartment = int(apartment)
-        if apartment <= 0:
-            raise ValueError('apartment')
-
     types = ('water',
              'heating',
              'electricity',
@@ -231,15 +312,87 @@ def validate_add_params(params):
 
 
 def validate_remove_params(params):
-    pass
+    """
+    Validates the needed params for remove function
+    Raises ValueError for invalid parameters
+    :param params: list of params
+    :return:list of useful params
+    """
+    if params[0] is not '' and params[4] == 'to' and params[2] is not '':
+        start_apart = int(params[0])
+        end_apart = int(params[2])
+        if start_apart > end_apart:
+            return end_apart, start_apart
+        else:
+            return start_apart, end_apart
+    elif params[0] is not '' and params[1] is '' and params[2] is '' and params[3] is None and params[4] is None:
+        apartment1 = int(params[0])
+        returnable = [apartment1]
+        return tuple(returnable)
+    elif params[0] is '' and params[1] is not '' and params[2] is '' and params[3] is None and params[4] is None:
+        type = params[1]
+        returnable = [type]
+        return tuple(returnable)
+    else:
+        raise ValueError('parameters!')
 
 
 def validate_replace_params(params):
-    pass
+    """
+    Validates the needed params
+    Raises ValueError for invalid parameters
+    :param params: list of params
+    :return:list of useful params
+    replace int<apartment> str<type> with int<amount>
+    """
+    apartment = params[0]
+    if apartment == '':
+        raise ValueError('apartment')
+    else:
+        apartment = int(apartment)
+
+    types = ('water',
+             'heating',
+             'electricity',
+             'gas',
+             'other')
+    type = params[1]
+    if type not in types:
+        raise ValueError('type')
+
+    amount = params[2]
+    print('amount = ' + str(amount))
+    if amount == '':
+        raise ValueError('amount')
+    else:
+        amount = int(amount)
+
+    return apartment, type, amount
 
 
 def validate_display_params(params):
-    pass
+    '''
+                    'list',
+    #               'list 15',
+    #               'list > 100',
+    #               'list = 17',
+    #               'list < 130,
+    :param params:
+    :return:
+    '''
+
+    if params[0] is not '' and params[1] in ['<', '>', '=', '>=', '<=']:
+        amount = int(params[0])
+        sign = params[1]
+        return amount, sign
+    elif params[0] is not '' and params[1] is '' and params[2] is '' and params[3] is None and params[4] is None:
+        apartment = int(params[0])
+        returnable = [apartment]
+        return tuple(returnable)
+    elif params[0] is '' and params[1] is '' and params[2] is '' and params[3] is None and params[4] is None:
+        return ()
+    else:
+        raise ValueError('parameters!')
 
 
 def validate_sum_of_expenses_params(params):
@@ -269,21 +422,75 @@ def validate_command(commands, cmd):
         return None
 
 
+def init_expenses():
+    expenses = [[1, 'electricity', 200],
+                [2, 'gas', 200],
+                [2, 'electricity', 13],
+                [3, 'water', 200],
+                [4, 'heating', 200],
+                [5, 'gas', 200],
+                [6, 'electricity', 200],
+                [7, 'gas', 200],
+                [8, 'other', 200],
+                [9, 'other', 200],
+                [10, 'other', 200]]
+    return expenses
+
+
 def main():
-    pass
+    expenses = init_expenses()
+    # for user_input in user_inputs:
+    while True:
+        cmd, params = read_command()
+        cmds = {'add': [add_expense, validate_add_params],
+                'remove': [remove, validate_remove_params],
+                'replace': [replace, validate_replace_params],
+                'list': [display, validate_display_params],
+                'sum': [sum_of_expenses, validate_sum_of_expenses_params],
+                'max': [max_of_expenses, validate_max_of_expenses_params],
+                'sort': [sort_expenses, validate_sort_expenses_params],
+                'filter': [filter, validate_filter_params],
+                'undo': [undo, validate_undo_params]}
+
+        # checks if the command exists and returns the function
+        function_to_call = validate_command(commands=cmds, cmd=cmd)
+        if function_to_call is not None:
+            # gets validation function
+            validation_function_to_run = cmds[cmd][1]
+            # validation
+            try:
+                # print('cmd = ', cmd)
+                # print('params = ', params)
+                params = validation_function_to_run(params)
+            except ValueError as exception:
+                print('Failed: Bad ' + str(exception.args[0]))
+                params = None
+
+            # calls function with proper params
+            if params is not None:
+                function_to_call(expenses, params)
+            # for expense in expenses:
+            #     print(expense)
+            print(' ')
+        elif cmd == 'exit':
+            return
+        else:
+            print("bad command\n")
 
 
 def test_read_command():
     user_inputs = ['     add 2 gas 200',
-                   'add 01 electricity 200']
-                    # 'remove 15',
-    # 'remove 5 to 10',
-    # 'remove gas',
-    # 'replace 12 gas with 200',
-    # 'list',
-    # 'list 15',
-    # 'list > 100',
-    # 'list = 17',
+                   'exitasf gdsjkohn',
+                   'add 01 electricity 200',
+                   'remove 2',
+                   'remove 5 to 6',
+                   'remove gas',
+                   'replace 10 other with 0 ',
+                   'list',
+                   'list 15',
+                   'list >= 100',
+                   'list = 200',
+                   'list < 130', ]
     # 'sum gas',
     # 'max 25',
     # 'sort apartment',
@@ -291,39 +498,45 @@ def test_read_command():
     # 'filter gas',
     # 'filter 300',
     # 'undo 12']
-    expenses = []
+    expenses = init_expenses()
     for user_input in user_inputs:
 
         cmd, params = read_command(user_input)
         cmds = {'add': [add_expense, validate_add_params],
                 'remove': [remove, validate_remove_params],
-                'replace': replace,
-                'list': display,
-                'sum': sum_of_expenses,
-                'max': max_of_expenses,
-                'sort': sort_expenses,
-                'filter': filter,
-                'undo': undo}
+                'replace': [replace, validate_replace_params],
+                'list': [display, validate_display_params],
+                'sum': [sum_of_expenses, validate_sum_of_expenses_params],
+                'max': [max_of_expenses, validate_max_of_expenses_params],
+                'sort': [sort_expenses, validate_sort_expenses_params],
+                'filter': [filter, validate_filter_params],
+                'undo': [undo, validate_undo_params]}
 
+        # checks if the command exists and returns the function
         function_to_call = validate_command(commands=cmds, cmd=cmd)
         if function_to_call is not None:
+            # gets validation function
             validation_function_to_run = cmds[cmd][1]
+            # validation
             try:
+                print('cmd = ', cmd)
+                print('params = ', params)
                 params = validation_function_to_run(params)
             except ValueError as exception:
                 print('Failed: Bad ' + str(exception.args[0]))
                 params = None
 
+            # calls function with proper params
             if params is not None:
-                function_to_call(expenses, validation_function_to_run(params))
-            print(expenses)
+                function_to_call(expenses, params)
+            for expense in expenses:
+                print(expense)
+            print(' ')
         elif cmd == 'exit':
             return
         else:
-            print("bad command")
+            print("bad command\n")
 
 
-test_read_command()
-'''
-add 12 food 
-'''
+#test_read_command()
+main()
