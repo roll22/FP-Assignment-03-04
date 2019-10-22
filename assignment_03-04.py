@@ -213,11 +213,6 @@ def create_expense(apartment, type, amount):
 
 
 '''
-cmd int tip int
-add int <apartment> str<type> int<amount>
-remove int<apartment>
-remove int<start apartment> to int<end apartment>
-remove str<type>
 replace int<apartment> str<type> with int<amount>
 list
 list int<apartment>
