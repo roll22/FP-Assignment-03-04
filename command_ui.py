@@ -1,37 +1,55 @@
-from Functionalities import add_expense, remove, replace, display, sum_of_expenses, max_of_expenses, sort_expenses, \
-    filter, undo
-from tools import init_expenses, read_command
+from Functionalities import \
+    add_expense, \
+    remove, \
+    replace, \
+    display, \
+    sum_of_expenses, \
+    max_of_expenses, \
+    sort_expenses, \
+    filter, \
+    undo
+from tools import read_command, init_expenses
 from validations import validate_add_params, validate_remove_params, validate_replace_params, validate_display_params, \
     validate_sum_of_expenses_params, validate_max_of_expenses_params, validate_sort_expenses_params, \
     validate_filter_params, validate_undo_params, validate_command
 
+'''
+add int<apartment> str<type> int<amount>
+remove int<apartment>
+remove int<start apartment> to int<end apartment>
+remove str<type>
+replace int<apartment> str<type> with int<amount>
+list
+list int<apartment>
+list str[ < | = | > ] int<amount>
+sum str<type>
+max int<apartment>
+sort int<apartment
+sort str<type
+filter str<type>
+filter int<value>
+undo int<steps>
+'''
+'''
+program start
+main
+choose_menu
+    command
+        command_main()
+        
+    menu
+        menu_main()
+        
+    
+'''
 
-def test_read_command():
-    user_inputs = ['     add 2 gas 200',
-                   'exitasf gdsjkohn',
-                   'add 01 electricity 200',
-                   'remove 2',
-                   'remove 5 to 6',
-                   'remove gas',
-                   'replace 10 other with 0 ',
-                   'list',
-                   'list 15',
-                   'list >= 100',
-                   'list = 200',
-                   'list < 130',
-                   'sum gas',
-                   'max 25',
-                   'sort apartment',
-                   'sort type',
-                   'filter gas',
-                   'filter 300',
-                   'undo 12']
 
+def main_functionality():
     expenses = init_expenses()
-
-    for user_input in user_inputs:
-
-        cmd, params = read_command(user_input)
+    history_expenses = [expenses]
+    no_of_commands = 0
+    while True:
+        cmd, params = read_command()
         cmds = {'add': [add_expense, validate_add_params],
                 'remove': [remove, validate_remove_params],
                 'replace': [replace, validate_replace_params],
@@ -49,8 +67,8 @@ def test_read_command():
             validation_function_to_run = cmds[cmd][1]
             # validation
             try:
-                print('cmd = ', cmd)
-                print('params = ', params)
+                # print('cmd = ', cmd)
+                # print('params = ', params)
                 params = validation_function_to_run(params)
             except ValueError as exception:
                 print('Failed: Bad ' + str(exception.args[0]))
@@ -59,8 +77,7 @@ def test_read_command():
             # calls function with proper params
             if params is not None:
                 function_to_call(expenses, params)
-            for expense in expenses:
-                print(expense)
+
             print(' ')
         elif cmd == 'exit':
             return

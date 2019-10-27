@@ -23,8 +23,12 @@ def read_command(usr_input=None):
                 with_word   :(str)   'with'     if the command contains the word
                 to_word     :(str)   'to'       if the command contains the word
     """
-    raw_input = input(">")
-    # raw_input = usr_input
+    # Debugging
+    if usr_input is None:
+        raw_input = input(">")
+    else:
+        raw_input = usr_input
+
     pattern = re.compile(r"""   \s*                                 
                                 (?P<command>\b[a-zA-Z]*\b)\s* 
                                 (?P<sign>[<>=]{1,2})?\s*
@@ -34,7 +38,6 @@ def read_command(usr_input=None):
                                 (?P<param2>\b[a-zA-Z]*\b)\s*
                                 (?P<with_optional>\bwith\b)?\s*
                                 (?P<param3>\b\d*\b)\s*
-                                
                                 """, re.VERBOSE)
     match = pattern.match(raw_input)
     cmd = None

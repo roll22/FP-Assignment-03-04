@@ -155,8 +155,26 @@ def max_of_expenses(expenses, params):
             print("No expense for type " + type + ' for apartment ' + str(apartment))
 
 
-def compute_total_amount():
-    pass
+def compute_total_amount(expenses, apartment):
+    """
+    Computes the total amount for a certain apartment
+    :param expenses:
+    :param apartment:
+    :return:
+    """
+    sum = 0
+    for expense in expenses:
+        if get_apartment(expense) == apartment:
+            sum += get_amount(expense)
+    return sum
+
+
+def get_set_of_apartments(expenses):
+    apartments_set = set()
+    for expense in expenses:
+        if get_apartment(expense) not in apartments_set:
+            apartments_set.add(get_apartment(expense))
+    return apartments_set
 
 
 def sort_apartment(expenses):
@@ -165,18 +183,14 @@ def sort_apartment(expenses):
     :param expenses: the expenses list
     :return: a list of the apartments expenses
     """
-    list_of_apartments = []
+    apartments_set = get_set_of_apartments(expenses)
+    apartments_sum = dict.fromkeys(apartments_set, 0)
     for expense in expenses:
-        if get_apartment(expense) not in list_of_apartments:
-            list_of_apartments.append(get_apartment(expense))
-
-    def sort_by_sublist(given_list):
-        given_list.sort(key=lambda x: x[2])
-        return given_list
-
-    list_of_apartments = sort_by_sublist(list_of_apartments)
-    return list_of_apartments
-
+        apartments_sum[get_apartment(expense)] += get_amount(expense)
+    sorted_apt_list = sorted(apartments_sum.items(), key=lambda kv: (kv[1], kv[0]))
+    print('sorted by apartment')
+    for elem in sorted_apt_list:
+        print('apartment: ' + str(elem[0]) + ' total amount: ' + str(elem[1]))
 
 def sort_type(expenses):
     pass

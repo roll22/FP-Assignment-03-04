@@ -30,15 +30,30 @@ filter str<type>
 filter int<value>
 undo int<steps>
 '''
+'''
+program start
+main
+choose_menu
+    command
+        command_main()
+
+    menu
+        menu_main()
 
 
-def main():
+'''
+
+
+def print_menu():
+    print('1.add')
+
+
+def main_functionality(expenses, history_expenses):
     expenses = init_expenses()
-    history_expenses = []
-    history_expenses.append(expenses)
-    print(history_expenses)
+    history_expenses = [expenses]
     no_of_commands = 0
     while True:
+        print_menu()
         cmd, params = read_command()
         cmds = {'add': [add_expense, validate_add_params],
                 'remove': [remove, validate_remove_params],
@@ -73,6 +88,3 @@ def main():
             return
         else:
             print("bad command\n")
-
-
-main()
