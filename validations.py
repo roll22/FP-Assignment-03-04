@@ -49,8 +49,15 @@ def validate_remove_params(params):
         return tuple(returnable)
     elif params[0] is '' and params[1] is not '' and params[2] is '' and params[3] is None and params[4] is None:
         type = params[1]
-        returnable = [type]
-        return tuple(returnable)
+        types = ['water',
+                 'heating',
+                 'electricity',
+                 'gas',
+                 'other']
+        if type in types:
+            return tuple([type])
+        else:
+            raise ValueError('type!')
     else:
         raise ValueError('parameters!')
 
@@ -78,7 +85,6 @@ def validate_replace_params(params):
         raise ValueError('type')
 
     amount = params[2]
-    print('amount = ' + str(amount))
     if amount == '':
         raise ValueError('amount')
     else:
@@ -159,11 +165,30 @@ def validate_sort_expenses_params(params):
 
 
 def validate_filter_params(params):
-    pass
+    if params[0] is '' and params[1] is not '' and params[2] is '' and params[3] is None and params[4] is None:
+        type = params[1]
+        types = ('water',
+                 'heating',
+                 'electricity',
+                 'gas',
+                 'other')
+        if type in types:
+            return tuple([type])
+        else:
+            raise ValueError('type!')
+    elif params[0] is not '' and params[1] is '' and params[2] is '' and params[3] is None and params[4] is None:
+        amount = params[0]
+        return tuple([amount])
+    else:
+        raise ValueError('amount/type!')
 
 
 def validate_undo_params(params):
-    pass
+    print(params)
+    if params[0] == '' and params[1] is '' and params[2] is '' and params[3] is None and params[4] is None:
+        return []
+    else:
+        raise ValueError('parameters!(no parameters required!!)')
 
 
 def validate_command(commands, cmd):

@@ -1,5 +1,6 @@
 import re
-from command_ui import main_functionality
+from command_ui import command_main_functionality
+
 
 def choose_input():
     while True:
@@ -13,9 +14,7 @@ def choose_input():
         if match is not None:
             choice = match.group("input")
             if choice is '1':
-                print('command')
-                main_functionality()
-                # call command_ui
+                command_main_functionality()
                 break
             elif choice is '2':
                 # call menu_ui

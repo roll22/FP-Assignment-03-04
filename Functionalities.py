@@ -170,6 +170,11 @@ def compute_total_amount(expenses, apartment):
 
 
 def get_set_of_apartments(expenses):
+    """
+    Returns a set of all the apartments
+    :param expenses:
+    :return:
+    """
     apartments_set = set()
     for expense in expenses:
         if get_apartment(expense) not in apartments_set:
@@ -179,7 +184,7 @@ def get_set_of_apartments(expenses):
 
 def sort_apartment(expenses):
     """
-
+    Sorts by apartments
     :param expenses: the expenses list
     :return: a list of the apartments expenses
     """
@@ -192,8 +197,21 @@ def sort_apartment(expenses):
     for elem in sorted_apt_list:
         print('apartment: ' + str(elem[0]) + ' total amount: ' + str(elem[1]))
 
+
 def sort_type(expenses):
-    pass
+    types = ('water',
+             'heating',
+             'electricity',
+             'gas',
+             'other')
+
+    types_and_amounts = dict.fromkeys(types, 0)
+    for expense in expenses:
+        types_and_amounts[get_type(expense)] += get_amount(expense)
+    sorted_type_list = sorted(types_and_amounts.items(), key=lambda kv: (kv[1], kv[0]))
+    print('sorted by type')
+    for elem in sorted_type_list:
+        print('type: ' + str(elem[0]) + ' total amount: ' + str(elem[1]))
 
 
 def sort_expenses(expenses, params):
@@ -211,9 +229,42 @@ def sort_expenses(expenses, params):
         sort_type(expenses)
 
 
-def filter(expenses, params):
-    pass
+def filter_amount(expenses, limit):
+    to_delete = []
+    for idx, expense in enumerate(expenses):
+        if get_amount(expense) >= int(limit):
+            to_delete.append(idx)
+    count = len(to_delete)
+    for offset, index in enumerate(to_delete):
+        index -= offset
+        del expenses[index]
+    print('Successfully deleted ' + str(count) + ' entries')
 
 
-def undo(expenses, params):
-    pass
+def filter_type(expenses, type):
+    to_delete = []
+    for idx, expense in enumerate(expenses):
+        if get_type(expense) != type:
+            to_delete.append(idx)
+    count = len(to_delete)
+    for offset, index in enumerate(to_delete):
+        index -= offset
+        del expenses[index]
+    print('Successfully deleted ' + str(count) + ' entries')
+
+
+def filter_expense(expenses, params):
+    if params[0].isdigit():
+        amount = params[0]
+        filter_amount(expenses, amount)
+    else:
+        type = params[0]
+        filter_type(expenses, type)
+
+
+def undo(expenses, history):
+    if len(history) > 1:
+        history.pop(len(history) - 1)
+        print('Undoed')
+    else:
+        print("Can't undo!")

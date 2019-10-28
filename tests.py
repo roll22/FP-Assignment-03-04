@@ -1,5 +1,5 @@
 from Functionalities import add_expense, remove, replace, display, sum_of_expenses, max_of_expenses, sort_expenses, \
-    filter, undo
+    filter_expense, undo
 from tools import init_expenses, read_command
 from validations import validate_add_params, validate_remove_params, validate_replace_params, validate_display_params, \
     validate_sum_of_expenses_params, validate_max_of_expenses_params, validate_sort_expenses_params, \
@@ -39,7 +39,7 @@ def test_read_command():
                 'sum': [sum_of_expenses, validate_sum_of_expenses_params],
                 'max': [max_of_expenses, validate_max_of_expenses_params],
                 'sort': [sort_expenses, validate_sort_expenses_params],
-                'filter': [filter, validate_filter_params],
+                'filter': [filter_expense, validate_filter_params],
                 'undo': [undo, validate_undo_params]}
 
         # checks if the command exists and returns the function
