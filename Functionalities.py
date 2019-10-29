@@ -80,8 +80,6 @@ def display(expenses, params):
     :return:
     """
     if len(params) == 0:
-        # 9 first 4 space 4 second 10 space 6 last
-
         for expense in expenses:
             print_expense(expense)
 

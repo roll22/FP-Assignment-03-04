@@ -1,5 +1,6 @@
 import re
 from command_ui import command_main_functionality
+from menu_ui import menu_main_functionality
 
 
 def choose_input():
@@ -17,12 +18,10 @@ def choose_input():
                 command_main_functionality()
                 break
             elif choice is '2':
-                # call menu_ui
-                print("menu")
+                menu_main_functionality()
                 break
             elif choice is '3':
                 print("User Cancelled!")
                 break
         else:
             print("Bad Command!")
-    pass

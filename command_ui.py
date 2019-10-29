@@ -8,19 +8,19 @@ from Functionalities import \
     sort_expenses, \
     filter_expense, \
     undo
-from tools import read_command, init_expenses
+from tools import read_command, init_expenses, check_list_identicity
 from validations import validate_add_params, validate_remove_params, validate_replace_params, validate_display_params, \
     validate_sum_of_expenses_params, validate_max_of_expenses_params, validate_sort_expenses_params, \
     validate_filter_params, validate_undo_params, validate_command
-
+import copy
 
 def command_main_functionality():
     expenses = init_expenses()
     history_expenses = []
-    copy_of_list = expenses.copy()
+    copy_of_list = copy.deepcopy(expenses)
     history_expenses.append(copy_of_list)
     while True:
-        expenses = history_expenses[len(history_expenses) - 1].copy()
+        expenses = copy.deepcopy(history_expenses[len(history_expenses) - 1])
         cmd, params = read_command()
         cmds = {'add': [add_expense, validate_add_params],
                 'remove': [remove, validate_remove_params],
@@ -54,8 +54,9 @@ def command_main_functionality():
                 function_to_call(expenses, params)
             print(' ')
             # we check if we modified the expense and if so we add an entry in history
-            if function_to_call != undo and expenses != history_expenses[len(history_expenses) - 1]:
-                history_expenses.append(list(expenses))
+            if function_to_call != undo and not check_list_identicity(expenses, history_expenses[len(history_expenses)-1]):
+                print('appended')
+                history_expenses.append(copy.deepcopy(expenses))
         elif cmd == 'exit':
             return
         else:

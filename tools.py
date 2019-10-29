@@ -76,3 +76,15 @@ def init_expenses():
                 [9, 'other', 15],
                 [10, 'other', 155]]
     return expenses
+
+
+def check_list_identicity(expenses, hist_expenses):
+    test = True
+    for idx in range(0, len(expenses)):
+        for idx2 in range(0, len(expenses[idx])):
+            try:
+                if expenses[idx][idx2] != hist_expenses[idx][idx2]:
+                    test = False
+            except Exception:
+                test = False
+    return test
